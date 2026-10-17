@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- PRIVACY: this policy stops the page from sending data anywhere (no network requests, no external scripts/fonts/images). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<title>iPlan — Student Dashboard</title>
+<style>
+:root{--p:#4f35c2;--pd:#3b2699;--pl:#efeaff;--bg:#f6f5fb;--c:#fff;--t:#231f33;--m:#5b5670;--bd:#d9d4ec;--w:#9a3f00;--e:#b42318;--ok:#146c43}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:16px/1.5 "Segoe UI",system-ui,-apple-system,"Noto Sans TC",sans-serif;display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:#fff;padding:8px;z-index:9}
+#nav{background:var(--c);border-right:1px solid var(--bd);padding:16px 10px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px}
+#nav .logo{font-weight:800;font-size:1.4rem;color:var(--p);padding:0 10px 14px;letter-spacing:-.5px}
+#nav button{display:flex;gap:10px;align-items:center;border:0;background:none;padding:11px 12px;border-radius:10px;font:inherit;color:var(--t);cursor:pointer;text-align:left;min-height:44px}
+#nav button:hover{background:var(--pl)}#nav button.on{background:var(--p);color:#fff;font-weight:600}
+.wrap{padding:20px 28px 40px;max-width:1100px;width:100%}
+header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+h1{margin:0;font-size:1.7rem;letter-spacing:-.5px;flex:1}h2{font-size:1.1rem;margin:0 0 8px}h3{font-size:1rem;margin:8px 0}
+.muted{color:var(--m);font-size:.9rem}.err{color:var(--e);margin:6px 0;min-height:1em}
+.card{background:var(--c);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.grid .card{margin:0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}.end{justify-content:flex-end}.grow{flex:1;min-width:0}
+.btn{font:inherit;border:1px solid var(--p);background:var(--c);color:var(--p);border-radius:10px;padding:8px 14px;min-height:44px;cursor:pointer}
+.btn:hover{background:var(--pl)}.btn.pri{background:var(--p);color:#fff}.btn.pri:hover{background:var(--pd)}.btn.dng{background:var(--e);border-color:var(--e);color:#fff}
+.btn.sm{min-height:36px;padding:4px 10px;font-size:.9rem}.link{border:0;background:none;color:var(--p);font:inherit;cursor:pointer;padding:6px 0;text-decoration:underline}
+input,select,textarea{font:inherit;border:1px solid #8c86a8;border-radius:8px;padding:8px;min-height:44px;background:#fff;color:var(--t);max-width:100%}
+textarea{width:100%}input[type=checkbox]{min-height:0;width:22px;height:22px;accent-color:var(--p)}
+label{display:grid;gap:3px;font-size:.9rem;color:var(--m)}.tool{align-items:end}
+.fld{display:grid;gap:3px;margin:10px 0}.fld label{color:var(--t);font-weight:600}fieldset{border:1px solid var(--bd);border-radius:8px}
+.days{display:flex;gap:8px;flex-wrap:wrap}.days label{display:flex;gap:4px;align-items:center;color:var(--t)}
+:focus-visible{outline:3px solid #7c5cf0;outline-offset:2px}
+.list{list-style:none;margin:0;padding:0}.list li{display:flex;gap:10px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.list li:last-child{border:0}.empty{color:var(--m);font-style:italic}.done{text-decoration:line-through;color:var(--m)}
+.tag{font-size:.8rem;border:1px solid var(--bd);border-radius:20px;padding:1px 8px;background:var(--pl);margin-right:4px;white-space:nowrap}
+.tag.o{border-color:var(--w);color:var(--w);background:#fff4e8;font-weight:700}
+.bar{height:10px;background:var(--pl);border-radius:6px;overflow:hidden}.bar div{height:100%;background:var(--p);width:0;transition:width .3s}
+.big{font-size:1.5rem;font-weight:700}.inc{color:var(--ok)}.exp{color:var(--e)}
+.sug{border:1px solid var(--bd);border-left:5px solid var(--p);border-radius:10px;padding:10px;margin:10px 0;display:grid;gap:8px}
+.wk{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.wk .card{margin:0}.now{border-color:var(--p);border-width:2px}
+.mg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.mg b{text-align:center;font-size:.85rem}
+.cell{min-height:64px;border:1px solid var(--bd);background:#fff;border-radius:8px;text-align:left;font:inherit;padding:4px;cursor:pointer;overflow:hidden;display:flex;flex-direction:column}
+.cell small{font-size:.7rem;color:var(--p);overflow:hidden;text-overflow:ellipsis}.cell.out{background:var(--bg);color:var(--m)}.cell.now{border-color:var(--p);border-width:2px;font-weight:700}
+dialog{border:0;border-radius:14px;padding:20px;width:min(480px,94vw);max-height:90vh}dialog::backdrop{background:#0006}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--t);color:#fff;padding:10px 18px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .25s}#toast.on{opacity:1}
+#banner{background:#fff4e8;border:1px solid var(--w);color:var(--w);padding:8px 12px;border-radius:10px;margin-bottom:12px}
+svg{max-width:100%;height:auto}.how{padding-left:20px}.how li{margin:8px 0}code{background:var(--pl);padding:1px 5px;border-radius:4px}
+@media(max-width:760px){body{grid-template-columns:1fr;padding-bottom:70px}
+#nav{position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;flex-direction:row;z-index:5;padding:4px;border-top:1px solid var(--bd);border-right:0;justify-content:space-around}
+#nav .logo{display:none}#nav button{flex-direction:column;gap:0;padding:4px 2px;font-size:.68rem;flex:1;justify-content:center;text-align:center}.wrap{padding:14px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<nav id="nav" aria-label="Main"></nav>
+<div class="wrap">
+<header><h1 id="pt">Overview</h1><span class="muted" id="dt"></span><button class="btn pri" id="yapb">✍️ Yap</button></header>
+<div id="banner" hidden>Your browser is blocking storage, so changes will be lost when you close this page. Use Settings → Export to keep a copy.</div>
+<main id="main">
+
+<section id="v-overview" hidden>
+<p class="muted" id="hello"></p>
+<div class="card"><h2>Yap Box</h2>
+<label for="yap">Write freely: ideas, tasks, habits, spending, appointments.</label>
+<textarea id="yap" rows="4" placeholder="e.g. Finish my psychology assignment by Friday, drink water every day, buy lunch tomorrow for NT$100"></textarea>
+<div class="row"><button class="btn pri" id="org">Organize my thoughts</button><span class="muted">Smart suggestions (rule-based, not AI). Nothing is saved until you confirm.</span></div>
+<div id="yapOut" aria-live="polite"></div></div>
+<div class="grid" id="ovc"></div>
+<div class="card" style="margin-top:14px"><h2>Recently added</h2><ul class="list" id="recent"></ul></div>
+<div class="card"><h2>Saved yaps</h2><ul class="list" id="notes"></ul></div>
+</section>
+
+<section id="v-tasks" hidden>
+<div class="row"><button class="btn pri" id="addT">+ Add task</button><span class="muted" id="tprog"></span></div>
+<div class="bar" aria-hidden="true"><div id="tbar"></div></div>
+<div class="row tool"><label>Search<input id="ts" type="search" placeholder="Title or notes"></label>
+<label>Filter<select id="tf"><option value="all">All</option><option value="active">Active</option><option value="done">Completed</option><option value="over">Overdue</option><option value="high">High priority</option></select></label>
+<label>Sort<select id="tso"><option value="c">Created</option><option value="due">Due date</option><option value="pri">Priority</option></select></label></div>
+<div class="card"><ul class="list" id="tl"></ul></div>
+</section>
+
+<section id="v-habits" hidden>
+<div class="row"><button class="btn" id="hp" aria-label="Previous day">◀</button><label>Date<input type="date" id="hd"></label><button class="btn" id="hn" aria-label="Next day">▶</button><button class="btn" id="ht">Today</button><button class="btn pri" id="addH">+ Add habit</button></div>
+<p id="hsum" class="big"></p>
+<div class="card"><ul class="list" id="hl"></ul></div>
+<div class="card"><h2>Last 7 days</h2><div id="hchart"></div><p class="muted">Each bar is the share of that day's scheduled habits you completed. Streak = consecutive scheduled days completed, ending today (today doesn't break it until the day is over; future days are never counted as missed).</p></div>
+</section>
+
+<section id="v-money" hidden>
+<div class="row"><button class="btn pri" id="addM">+ Add entry</button></div>
+<div class="row tool"><label>Search<input id="mq" type="search"></label>
+<label>Type<select id="mt"><option value="all">All</option><option>Income</option><option>Expense</option></select></label>
+<label>Category<select id="mc"></select></label><label>From<input type="date" id="mf"></label><label>To<input type="date" id="mto"></label></div>
+<div class="grid" id="mtot"></div>
+<div class="card" style="margin-top:14px"><h2>Chart</h2><div id="mchart"></div></div>
+<div class="card"><ul class="list" id="ml"></ul></div>
+<p class="muted">Totals only include entries you type in. iPlan is not connected to any bank and gives no financial advice.</p>
+</section>
+
+<section id="v-planner" hidden>
+<div class="row tool"><label>View<select id="pv"><option value="day">Day</option><option value="week">Week</option><option value="month">Month</option></select></label>
+<button class="btn" id="pp" aria-label="Previous">◀</button><button class="btn" id="pt2">Today</button><button class="btn" id="pn" aria-label="Next">▶</button>
+<strong id="plab"></strong><button class="btn pri" id="addE">+ Add event</button></div>
+<div id="pbody"></div>
+</section>
+
+<section id="v-settings" hidden>
+<div class="card"><h2>Profile (optional)</h2>
+<div class="row"><label>Display name<input id="pn1"></label><label>School<input id="pn2" placeholder="e.g. NCKU"></label></div>
+<div class="row"><label>Department / major<input id="pn3"></label><label>Year<input id="pn4"></label></div>
+<label>Goal or motto<input id="pn5"></label>
+<div class="row"><button class="btn pri" id="psave">Save profile</button></div>
+<p class="muted">Please don't enter anything you wouldn't want someone else using this browser to see.</p></div>
+<div class="card"><h2>Currency</h2><label>Display currency<select id="cur"></select></label></div>
+<div class="card"><h2>Your data: how saving and backups work</h2>
+<p><strong>Your data is saved automatically.</strong> Everything you add stays in this browser on this device. There is no server and no account, so you do <em>not</em> need to import anything each time. Just open iPlan again in the same browser and the same address, and it's all there.</p>
+<p><strong>When could data disappear?</strong> If you clear browsing/site data, use a private or incognito window, switch to a different browser or device, or open iPlan from a different address (the file on your computer and the GitHub Pages link keep separate data).</p>
+<ol class="how"><li><strong>Back up:</strong> press <em>Export backup</em>. A file named <code>iplan-backup-DATE.json</code> downloads to your computer. Do this every week or so, and always before clearing browser data.</li>
+<li><strong>Restore or move to another device:</strong> press <em>Import backup</em>, choose that file, and confirm. It replaces what's currently in iPlan. (To move devices, send the file to yourself first.)</li></ol>
+<div class="row"><button class="btn" id="exp">Export backup (JSON)</button><button class="btn" id="imp">Import backup</button><button class="btn dng" id="rst">Erase all data</button></div>
+<input type="file" id="impf" accept=".json,application/json" hidden>
+<p class="err" id="impmsg" role="alert"></p>
+<p class="muted"><strong>Privacy:</strong> iPlan has no tracking and makes no network requests, so your notes never leave your device. Backup files are plain text, so keep them somewhere private. On a shared computer, erase your data when you finish.</p></div>
+</section>
+</main></div>
+<dialog id="dlg"></dialog><div id="toast" role="status"></div>
+
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0');
+const fd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());          // Date -> "YYYY-MM-DD" (local time)
+const td=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};      // "YYYY-MM-DD" -> local Date (avoids timezone bugs)
+const today=()=>fd(new Date()),add=(s,n)=>{const d=td(s);d.setDate(d.getDate()+n);return fd(d)};
+const DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],dow=s=>(td(s).getDay()+6)%7;  // Monday = 0
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const okD=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+// h() builds elements safely: text is always added as text, never as HTML (prevents HTML injection)
+const h=(t,a={},...k)=>{const e=document.createElement(t);for(const[n,v]of Object.entries(a)){if(n==='class')e.className=v;else if(n.slice(0,2)==='on')e.addEventListener(n.slice(2),v);else if(v===true)e.setAttribute(n,'');else if(v!==false&&v!=null)e.setAttribute(n,v)}k.flat(9).forEach(c=>c!=null&&e.append(c.nodeType?c:document.createTextNode(c)));return e};
+const empty=m=>h('li',{class:'empty'},m);
+let tt;const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200)};
+
+/* ---------- data (saved in localStorage under one versioned key) ---------- */
+const K='iplan.v1',CUR=['NT$','US$','¥','€','£','₩'],CAT=['Food','Transport','Study','Shopping','Salary','Other'];
+let S;
+const dflt=()=>({v:1,profile:{name:'',school:'',dept:'',year:'',goal:''},cur:'NT$',tasks:[],habits:[],money:[],events:[],notes:[]});
+function load(){let r=null;try{r=JSON.parse(localStorage.getItem(K)||'null')}catch(e){}return clean(r)}
+function clean(r){const d=dflt();try{
+ if(r&&typeof r==='object'){for(const k of['tasks','habits','money','events','notes'])if(Array.isArray(r[k]))d[k]=r[k].filter(x=>x&&typeof x==='object'&&typeof x.id==='string');
+  if(r.profile&&typeof r.profile==='object')for(const k in d.profile)if(typeof r.profile[k]==='string')d.profile[k]=r.profile[k];
+  if(CUR.includes(r.cur))d.cur=r.cur}}catch(e){}
+ d.tasks.forEach(t=>{t.title=String(t.title||'Untitled');if(!okD(t.due))t.due='';if(!['Low','Medium','High'].includes(t.pri))t.pri='Medium';if(!['To do','In progress','Completed'].includes(t.st))t.st='To do';t.c=+t.c||0});
+ d.habits.forEach(x=>{x.name=String(x.name||'Habit');x.done=Array.isArray(x.done)?x.done.filter(okD):[];x.days=Array.isArray(x.days)&&x.days.length?x.days.filter(i=>i>=0&&i<7):[0,1,2,3,4,5,6];x.c=+x.c||0});
+ d.money=d.money.filter(m=>okD(m.date)&&+m.amt>0);d.money.forEach(m=>{m.amt=+m.amt;m.desc=String(m.desc||'');if(!CAT.includes(m.cat))m.cat='Other';if(m.type!=='Income')m.type='Expense';m.c=+m.c||0});
+ d.events=d.events.filter(e=>okD(e.date));d.events.forEach(e=>{e.title=String(e.title||'Event');e.start=String(e.start||'');e.end=String(e.end||'');e.c=+e.c||0});
+ d.notes.forEach(n=>{n.text=String(n.text||'');n.c=+n.c||0});return d}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){$('#banner').hidden=false}}
+const fm=n=>S.cur+' '+Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
+
+/* ---------- dialogs: one generic form + one confirm box ---------- */
+const dlg=()=>$('#dlg');
+function ask(msg,yes,label='Delete'){dlg().replaceChildren(h('p',{},msg),h('div',{class:'row end'},h('button',{class:'btn',onclick:()=>dlg().close()},'Cancel'),h('button',{class:'btn dng',onclick:()=>{dlg().close();yes()}},label)));dlg().showModal()}
+function form(title,F,v,ok){
+ const err=h('p',{class:'err',role:'alert'}),ins={};
+ const rows=F.map(f=>{const id='f_'+f.k,val=v[f.k]??'';let c;
+  if(f.t==='sel')c=h('select',{id},f.o.map(o=>h('option',{value:o,selected:o===val},o)));
+  else if(f.t==='days')c=h('div',{class:'days'},DOW.map((n,i)=>h('label',{},h('input',{type:'checkbox',value:i,checked:val.includes(i)}),n)));
+  else if(f.t==='area')c=h('textarea',{id,rows:3},String(val));
+  else c=h('input',{id,type:f.t||'text',value:val,step:f.t==='number'?'0.01':null});
+  ins[f.k]=c;return f.t==='days'?h('fieldset',{},h('legend',{},f.l+' *'),c):h('div',{class:'fld'},h('label',{for:id},f.l+(f.r?' *':'')),c)});
+ const f=h('form',{onsubmit:e=>{e.preventDefault();const o={};
+  for(const q of F){const c=ins[q.k];o[q.k]=q.t==='days'?[...c.querySelectorAll('input:checked')].map(i=>+i.value):q.t==='number'?parseFloat(c.value):c.value.trim()}
+  const m=F.find(q=>q.r&&(q.t==='days'?!o[q.k].length:q.t==='number'?!(o[q.k]>0):!o[q.k]));
+  if(m){err.textContent=m.l+(m.t==='number'?' must be greater than 0.':m.t==='days'?': pick at least one day.':' is required.');return}
+  const e2=ok(o);if(e2){err.textContent=e2;return}dlg().close()}},
+  h('h2',{},title),rows,err,h('div',{class:'row end'},h('button',{class:'btn',type:'button',onclick:()=>dlg().close()},'Cancel'),h('button',{class:'btn pri',type:'submit'},'Save')));
+ dlg().replaceChildren(f);dlg().showModal();const first=f.querySelector('input,select,textarea');first&&first.focus()}
+// add (item missing) or edit (item given) a record in list L
+function edit(name,L,F,item,def,chk){form((item?'Edit ':'Add ')+name,F,item||def,o=>{const e=chk&&chk(o);if(e)return e;
+ if(item)Object.assign(item,o);else L.push({id:uid(),c:Date.now(),...def,...o});save();render();toast('Saved ✓')})}
+const del=(L,item,msg)=>ask(msg,()=>{L.splice(L.indexOf(item),1);save();render();toast('Deleted')});
+const acts=(L,F,item,name,def,chk)=>[h('button',{class:'btn sm',onclick:()=>edit(name,L,F,item,def,chk)},'Edit'),h('button',{class:'btn sm',onclick:()=>del(L,item,'Delete "'+(item.title||item.name||item.desc)+'"? This cannot be undone.')},'Delete')];
+
+/* ---------- Tasks ---------- */
+const PR={Low:0,Medium:1,High:2};
+const TF=[{k:'title',l:'Title',r:1},{k:'notes',l:'Notes',t:'area'},{k:'due',l:'Due date',t:'date'},{k:'pri',l:'Priority',t:'sel',o:['Low','Medium','High']},{k:'st',l:'Status',t:'sel',o:['To do','In progress','Completed']},{k:'tag',l:'Category / tag'}];
+const over=t=>t.due&&t.st!=='Completed'&&t.due<today();
+function rTasks(){
+ const q=$('#ts').value.toLowerCase(),f=$('#tf').value,so=$('#tso').value,T=S.tasks,dn=T.filter(t=>t.st==='Completed').length;
+ $('#tprog').textContent=dn+' of '+T.length+' completed';$('#tbar').style.width=(T.length?dn/T.length*100:0)+'%';
+ const L=T.filter(t=>(t.title+' '+(t.notes||'')).toLowerCase().includes(q)&&(f==='all'||(f==='active'&&t.st!=='Completed')||(f==='done'&&t.st==='Completed')||(f==='over'&&over(t))||(f==='high'&&t.pri==='High')));
+ L.sort(so==='due'?(a,b)=>(a.due||'9').localeCompare(b.due||'9'):so==='pri'?(a,b)=>(PR[b.pri]||0)-(PR[a.pri]||0):(a,b)=>a.c-b.c);
+ $('#tl').replaceChildren(...(L.length?L.map(t=>h('li',{},
+  h('input',{type:'checkbox',checked:t.st==='Completed','aria-label':'Completed: '+t.title,onchange:e=>{t.st=e.target.checked?'Completed':'To do';save();render()}}),
+  h('div',{class:'grow'},h('div',{class:t.st==='Completed'?'done':''},t.title),t.notes?h('div',{class:'muted'},t.notes):null,
+   h('div',{},h('span',{class:'tag'},'Priority: '+t.pri),h('span',{class:'tag'},t.st),t.due?h('span',{class:'tag'},'Due '+t.due):null,over(t)?h('span',{class:'tag o'},'⚠ Overdue'):null,t.tag?h('span',{class:'tag'},'#'+t.tag):null)),
+  acts(T,TF,t,'task'))):[empty(T.length?'No tasks match your search or filter.':'No tasks yet — add your first task.')]))}
+
+/* ---------- Habits ---------- */
+let hd=today();
+const HF=[{k:'name',l:'Habit name',r:1},{k:'desc',l:'Description',t:'area'},{k:'days',l:'Days',t:'days',r:1}];
+const sched=(x,d)=>x.days.includes(dow(d));
+function streak(x){let n=0,d=today();for(let i=0;i<400;i++,d=add(d,-1)){if(!sched(x,d))continue;if(x.done.includes(d))n++;else if(d!==today())break}return n}
+function rHabits(){
+ $('#hd').value=hd;const H=S.habits,sc=H.filter(x=>sched(x,hd)),dn=sc.filter(x=>x.done.includes(hd)).length;
+ $('#hsum').textContent=sc.length?dn+' of '+sc.length+' done on '+hd:'Nothing scheduled on '+hd;
+ $('#hl').replaceChildren(...(H.length?H.map(x=>{const s=sched(x,hd);return h('li',{},
+  h('input',{type:'checkbox',disabled:!s,checked:x.done.includes(hd),'aria-label':x.name+' on '+hd,onchange:e=>{x.done=x.done.filter(d=>d!==hd);if(e.target.checked)x.done.push(hd);save();render()}}),
+  h('div',{class:'grow'},h('div',{},x.name),x.desc?h('div',{class:'muted'},x.desc):null,
+   h('div',{class:'muted'},(s?'':'Not scheduled this day · ')+x.days.map(i=>DOW[i]).join(', ')+' · Streak: '+streak(x)+' · Total: '+x.done.length)),acts(H,HF,x,'habit',{days:[0,1,2,3,4,5,6]}))}):[empty('No habits yet — add one small habit to begin.')]));
+ const ds=[...Array(7)].map((_,i)=>add(today(),i-6)),sum=[];
+ const bars=ds.map((d,i)=>{const s=H.filter(x=>sched(x,d)),n=s.filter(x=>x.done.includes(d)).length,p=s.length?Math.round(n/s.length*100):0,x=20+i*76;
+  sum.push(d+': '+(s.length?n+' of '+s.length:'nothing scheduled'));
+  return `<rect x="${x}" y="20" width="48" height="100" rx="4" fill="none" stroke="#b9aef0"/><rect x="${x}" y="${120-p}" width="48" height="${p}" rx="4" fill="#4f35c2"/><text x="${x+24}" y="14" text-anchor="middle" font-size="12">${s.length?n+'/'+s.length:'–'}</text><text x="${x+24}" y="138" text-anchor="middle" font-size="11">${DOW[dow(d)]} ${d.slice(8)}</text>`}).join('');
+ $('#hchart').innerHTML=`<svg viewBox="0 0 560 146" role="img" aria-label="Habit completion, last 7 days. ${esc(sum.join('; '))}">${bars}</svg>`}
+
+/* ---------- Money ---------- */
+const MF=[{k:'desc',l:'Description',r:1},{k:'amt',l:'Amount',t:'number',r:1},{k:'type',l:'Type',t:'sel',o:['Expense','Income']},{k:'date',l:'Date',t:'date',r:1},{k:'cat',l:'Category',t:'sel',o:CAT},{k:'note',l:'Note',t:'area'}];
+function bars(rows,col){const mx=Math.max(...rows.map(r=>r[1]),1);
+ return `<svg viewBox="0 0 520 ${rows.length*30+6}" role="img" aria-label="${esc(rows.map(r=>r[0]+' '+fm(r[1])).join('; '))}">`+rows.map((r,i)=>`<text x="0" y="${i*30+20}" font-size="13">${esc(r[0])}</text><rect x="90" y="${i*30+6}" width="${Math.max(r[1]/mx*300,2)}" height="20" rx="4" fill="${col}"/><text x="${96+r[1]/mx*300}" y="${i*30+20}" font-size="13">${esc(fm(r[1]))}</text>`).join('')+'</svg>'}
+function rMoney(){
+ const q=$('#mq').value.toLowerCase(),ty=$('#mt').value,ca=$('#mc').value,f=$('#mf').value,t=$('#mto').value;
+ const L=S.money.filter(m=>(m.desc+' '+(m.note||'')).toLowerCase().includes(q)&&(ty==='all'||m.type===ty)&&(ca==='all'||m.cat===ca)&&(!f||m.date>=f)&&(!t||m.date<=t)).sort((a,b)=>b.date.localeCompare(a.date));
+ const inc=L.filter(m=>m.type==='Income').reduce((a,m)=>a+m.amt,0),ex=L.filter(m=>m.type==='Expense').reduce((a,m)=>a+m.amt,0);
+ $('#mtot').replaceChildren(h('div',{class:'card'},h('div',{class:'muted'},'Income'),h('div',{class:'big inc'},fm(inc))),h('div',{class:'card'},h('div',{class:'muted'},'Expenses'),h('div',{class:'big exp'},fm(ex))),h('div',{class:'card'},h('div',{class:'muted'},'Balance'),h('div',{class:'big'},(inc-ex<0?'− ':'')+fm(Math.abs(inc-ex)))));
+ const cats=CAT.map(c=>[c,L.filter(m=>m.type==='Expense'&&m.cat===c).reduce((a,m)=>a+m.amt,0)]).filter(r=>r[1]>0);
+ $('#mchart').innerHTML=L.length?`<h3>Income vs expenses</h3>`+bars([['Income',inc],['Expenses',ex]],'#4f35c2')+(cats.length?`<h3>Expenses by category</h3>`+bars(cats,'#8b6cf0'):''):'<p class="empty">Add entries to see a chart.</p>';
+ $('#ml').replaceChildren(...(L.length?L.map(m=>h('li',{},h('div',{class:'grow'},h('div',{},m.desc),h('div',{class:'muted'},m.date+' · '+m.cat+(m.note?' · '+m.note:''))),
+  h('strong',{class:m.type==='Income'?'inc':'exp'},(m.type==='Income'?'Income +':'Expense −')+fm(m.amt)),acts(S.money,MF,m,'entry',{type:'Expense',date:today(),cat:'Food'}))):[empty(S.money.length?'No entries match your filters.':'No entries yet — add your first income or expense.')]))}
+
+/* ---------- Planner ---------- */
+let pv='week',pa=today();
+const EF=[{k:'title',l:'Title',r:1},{k:'date',l:'Date',t:'date',r:1},{k:'start',l:'Start time',t:'time'},{k:'end',l:'End time',t:'time'},{k:'notes',l:'Notes',t:'area'}];
+const eChk=o=>o.end&&!o.start?'Add a start time before an end time.':o.end&&o.end<o.start?'End time must be after the start time.':'';
+const evOn=d=>S.events.filter(e=>e.date===d).sort((a,b)=>a.start.localeCompare(b.start));
+const evLi=e=>h('li',{},h('div',{class:'grow'},h('strong',{},(e.start?e.start+(e.end?'–'+e.end:''):'All day')+' · '+e.title),e.notes?h('div',{class:'muted'},e.notes):null),acts(S.events,EF,e,'event',{date:pa},eChk));
+function rPlanner(){
+ $('#pv').value=pv;const o=$('#pbody');o.replaceChildren();let lab;
+ if(pv==='day'){lab=pa;const L=evOn(pa);o.append(h('div',{class:'card'},h('ul',{class:'list'},L.length?L.map(evLi):empty('Nothing scheduled — add an event.'))))}
+ else if(pv==='week'){const s=add(pa,-dow(pa));lab=s+' → '+add(s,6);
+  o.append(h('div',{class:'wk'},[0,1,2,3,4,5,6].map(i=>{const d=add(s,i),L=evOn(d);return h('div',{class:'card'+(d===today()?' now':'')},h('h3',{},DOW[i]+' '+d.slice(5)+(d===today()?' (today)':'')),h('ul',{class:'list'},L.length?L.map(evLi):h('li',{class:'muted'},'No events')))})))}
+ else{const f=td(pa);f.setDate(1);lab=f.toLocaleString(undefined,{month:'long',year:'numeric'});const st=add(fd(f),-dow(fd(f)));
+  o.append(h('div',{class:'mg'},DOW.map(n=>h('b',{},n)),[...Array(42)].map((_,i)=>{const d=add(st,i),L=evOn(d);
+   return h('button',{class:'cell'+(td(d).getMonth()===f.getMonth()?'':' out')+(d===today()?' now':''),'aria-label':d+', '+L.length+' events',onclick:()=>{pa=d;pv='day';rPlanner()}},
+    h('span',{},d.slice(8)+(d===today()?' (today)':'')),L.length?h('small',{},L.length+' · '+L[0].title):null)})))}
+ $('#plab').textContent=lab}
+function pstep(n){if(pv==='month'){const d=td(pa);d.setMonth(d.getMonth()+n,1);pa=fd(d)}else pa=add(pa,n*(pv==='week'?7:1));rPlanner()}
+
+/* ---------- Yap Box: rule-based "smart suggestions" (no AI) ---------- */
+const KINDS=['Task','Habit','Planner','Money','Note'];let dr=null,orig='';
+function guess(c){const l=c.toLowerCase(),T=today();let m;
+ const a=l.match(/(?:nt\$|\$|ntd|twd)\s*([\d,]+(?:\.\d+)?)|([\d,]+(?:\.\d+)?)\s*(?:nt\$|ntd|twd|dollars?)/)||[];
+ const amt=parseFloat((a[1]||a[2]||'').replace(/,/g,''))||'';
+ let time='';if(m=l.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/))time=pad((+m[1]%12)+(m[3]==='pm'?12:0))+':'+(m[2]||'00');else if(m=l.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/))time=pad(+m[1])+':'+m[2];
+ let d='';
+ if(m=l.match(/\b\d{4}-\d{2}-\d{2}\b/))d=okD(m[0])?m[0]:'';
+ else if(m=l.match(/\b(\d{1,2})\/(\d{1,2})\b/)){const x=new Date(new Date().getFullYear(),m[1]-1,m[2]);if(x.getMonth()==m[1]-1)d=fd(x)}
+ else if(/\btomorrow\b/.test(l))d=add(T,1);else if(/\b(today|tonight)\b/.test(l))d=T;else if(/\byesterday\b/.test(l))d=add(T,-1);
+ else if(m=l.match(/\b(next\s+)?(mon|tues|wednes|thurs|fri|satur|sun)day\b/)){let n=(['mon','tues','wednes','thurs','fri','satur','sun'].indexOf(m[2])-dow(T)+7)%7;if(m[1]&&!n)n=7;d=add(T,n)}
+ const sc={Money:(amt?3:0)+(/\b(spent|paid|pay|bought|salary|earned|received|allowance|income|cost)\b/.test(l)?1:0),
+  Task:/\b(finish|submit|assignment|homework|deadline|due|need to|have to|must|should|remember to|complete|prepare|report|essay|study|buy)\b/.test(l)?2:0,
+  Habit:/\b(every ?day|daily|each (morning|night|day|week)|every (morning|night|week|mon|tues|wednes|thurs|fri|satur|sun)|weekly)/.test(l)?3:0,
+  Planner:(/\b(meeting|class|lecture|appointment|exam|interview|calendar|seminar|presentation|schedule)\b/.test(l)?2:0)+(time?1:0)};
+ const r=Object.entries(sc).sort((x,y)=>y[1]-x[1]),ok=r[0][1]>=2;
+ const title=c.replace(/^(?:and\s+)?(?:i\s+)?(?:need to|have to|must|should|remember to|don't forget to)\s+/i,'').replace(/[.!?]+$/,'').trim();
+ return{kind:ok?r[0][0]:'Note',sure:ok&&r[0][1]>r[1][1],title:title.charAt(0).toUpperCase()+title.slice(1),date:d,time,amt,mtype:/\b(salary|earned|received|allowance|income)\b/.test(l)?'Income':'Expense'}}
+function organize(){const o=$('#yapOut'),txt=$('#yap').value.trim();
+ if(!txt){dr=null;o.replaceChildren(h('p',{class:'err'},'Write something first, then press Organize.'));return}
+ orig=txt;dr=txt.split(/\n+|[;.!?](?:\s+|$)|,\s+(?:and\s+)?|\s+and\s+then\s+/i).map(s=>s.trim()).filter(s=>s.length>1).map(guess);
+ if(!dr.length)dr=[{kind:'Note',sure:false,title:txt,date:'',time:'',amt:'',mtype:'Expense'}];renderDraft()}
+function renderDraft(){const o=$('#yapOut');o.replaceChildren();if(!dr)return;
+ o.append(h('h3',{},'Suggestions — review, edit, then confirm'),...dr.map((x,i)=>{
+  const inp=(k,l,t='text')=>h('label',{},l,h('input',{type:t,value:x[k]??'',step:t==='number'?'0.01':null,oninput:e=>x[k]=e.target.value}));
+  return h('div',{class:'sug'},h('div',{class:'muted'},x.sure?'Fairly sure about this one.':'Not sure — please check where this belongs.'),
+   h('label',{},'Destination',h('select',{onchange:e=>{x.kind=e.target.value;renderDraft()}},KINDS.map(k=>h('option',{value:k,selected:k===x.kind},k)))),
+   inp('title','Text'),
+   x.kind==='Task'||x.kind==='Planner'||x.kind==='Money'?inp('date',x.kind==='Task'?'Due date (optional)':'Date (required)','date'):null,
+   x.kind==='Planner'?inp('time','Start time (optional)','time'):null,
+   x.kind==='Money'?[inp('amt','Amount','number'),h('label',{},'Type',h('select',{onchange:e=>x.mtype=e.target.value},['Expense','Income'].map(k=>h('option',{value:k,selected:k===x.mtype},k))))]:null,
+   h('div',{},h('button',{class:'btn sm',onclick:()=>{dr.splice(i,1);if(!dr.length)dr=null;renderDraft()}},'Remove')))}),
+  h('div',{class:'row'},h('button',{class:'btn pri',onclick:confirmDraft},'Confirm and save'),h('button',{class:'btn',onclick:()=>{dr=null;renderDraft()}},'Discard')),h('p',{class:'err',id:'yerr',role:'alert'}))}
+function confirmDraft(){const e=$('#yerr');
+ for(const[i,x]of dr.entries()){const n='Item '+(i+1)+': ';x.title=(x.title||'').trim();
+  if(!x.title)return e.textContent=n+'text is required.';
+  if(x.kind==='Planner'&&!x.date)return e.textContent=n+'pick a date (nothing is guessed for you).';
+  if(x.kind==='Money'){if(!(parseFloat(x.amt)>0))return e.textContent=n+'enter an amount above 0.';if(!x.date)return e.textContent=n+'pick a date (nothing is guessed for you).'}}
+ const b=()=>({id:uid(),c:Date.now()});
+ dr.forEach(x=>{const l=x.title.toLowerCase();
+  if(x.kind==='Task')S.tasks.push({...b(),title:x.title,notes:'',due:okD(x.date)?x.date:'',pri:'Medium',st:'To do',tag:''});
+  else if(x.kind==='Habit')S.habits.push({...b(),name:x.title,desc:'',days:[0,1,2,3,4,5,6],done:[]});
+  else if(x.kind==='Planner')S.events.push({...b(),title:x.title,date:x.date,start:x.time||'',end:'',notes:''});
+  else if(x.kind==='Money')S.money.push({...b(),desc:x.title,amt:parseFloat(x.amt),type:x.mtype,date:x.date,note:'',cat:/lunch|dinner|food|coffee|meal|breakfast/.test(l)?'Food':/bus|mrt|train|taxi|uber/.test(l)?'Transport':/book|tuition|print/.test(l)?'Study':/salary|allowance/.test(l)?'Salary':'Other'});
+  else S.notes.push({...b(),text:x.title})});
+ S.notes.push({...b(),text:orig,orig:1});dr=null;$('#yap').value='';save();render();renderDraft();toast('Saved ✓')}
+
+/* ---------- Overview ---------- */
+const card=(t,v,...k)=>h('section',{class:'card'},h('h2',{},t),k,h('button',{class:'link',onclick:()=>location.hash=v},'Open '+t));
+function rOverview(){const p=S.profile,T=today(),mo=T.slice(0,7);
+ $('#hello').textContent=(p.name?'Hi, '+p.name+'. ':'Welcome to iPlan. ')+(p.goal||'If something matters, it should not disappear just because you closed a tab.');
+ const op=S.tasks.filter(t=>t.st!=='Completed'),sc=S.habits.filter(x=>sched(x,T)),dn=sc.filter(x=>x.done.includes(T)).length;
+ const up=S.events.filter(e=>e.date>=T).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start)).slice(0,4);
+ const mm=S.money.filter(m=>m.date.startsWith(mo)),inc=mm.filter(m=>m.type==='Income').reduce((a,m)=>a+m.amt,0),ex=mm.filter(m=>m.type==='Expense').reduce((a,m)=>a+m.amt,0);
+ $('#ovc').replaceChildren(
+  card('Tasks','tasks',h('p',{},h('span',{class:'big'},op.filter(t=>t.due===T).length),' due today'),h('p',{},S.tasks.filter(over).length?'⚠ '+S.tasks.filter(over).length+' overdue':'Nothing overdue'),h('p',{class:'muted'},op.length+' open')),
+  card('Habits','habits',h('p',{},h('span',{class:'big'},dn+'/'+sc.length),' done today'),h('div',{class:'bar','aria-hidden':'true'},h('div',{style:'width:'+(sc.length?dn/sc.length*100:0)+'%'}))),
+  card('Planner','planner',h('ul',{class:'list'},up.length?up.map(e=>h('li',{},e.date.slice(5)+' '+(e.start||'')+' '+e.title)):empty('Nothing coming up.'))),
+  card('Money','money',h('p',{class:'muted'},'This month'),h('p',{class:'inc'},'Income '+fm(inc)),h('p',{class:'exp'},'Expenses '+fm(ex)),h('p',{},h('strong',{},'Balance '+(inc-ex<0?'− ':'')+fm(Math.abs(inc-ex))))));
+ const rec=[...S.tasks.map(x=>['Task',x.title,x.c]),...S.habits.map(x=>['Habit',x.name,x.c]),...S.events.map(x=>['Event',x.title,x.c]),...S.money.map(x=>['Money',x.desc,x.c])].sort((a,b)=>b[2]-a[2]).slice(0,5);
+ $('#recent').replaceChildren(...(rec.length?rec.map(r=>h('li',{},h('span',{class:'tag'},r[0]),r[1])):[empty('Nothing yet — try the Yap Box above.')]));
+ $('#notes').replaceChildren(...(S.notes.length?[...S.notes].reverse().map(n=>h('li',{},h('div',{class:'grow'},h('span',{class:'tag'},n.orig?'Original yap':'Note'),n.text),h('button',{class:'btn sm',onclick:()=>del(S.notes,n,'Delete this saved note?')},'Delete'))):[empty('No saved notes yet.')]))}
+
+/* ---------- Settings ---------- */
+const PK={name:'#pn1',school:'#pn2',dept:'#pn3',year:'#pn4',goal:'#pn5'};
+function rSettings(){for(const k in PK)$(PK[k]).value=S.profile[k];$('#cur').value=S.cur}
+
+/* ---------- navigation & start-up ---------- */
+const V=[['overview','Overview','🏠','Home'],['tasks','Tasks','✅','Tasks'],['habits','Habits','🔁','Habits'],['money','Money','💰','Money'],['planner','Planner','📅','Plan'],['settings','Profile & Settings','⚙️','Profile']];
+const R={overview:rOverview,tasks:rTasks,habits:rHabits,money:rMoney,planner:rPlanner,settings:rSettings};let cv='overview';
+const render=()=>R[cv]();
+function go(v){if(!R[v])v='overview';cv=v;V.forEach(x=>$('#v-'+x[0]).hidden=x[0]!==v);
+ document.querySelectorAll('#nav button').forEach(b=>{const on=b.dataset.v===v;b.classList.toggle('on',on);on?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current')});
+ $('#pt').textContent=V.find(x=>x[0]===v)[1];render()}
+function init(){S=load();
+ $('#nav').append(h('div',{class:'logo'},'iPlan'),...V.map(x=>h('button',{'data-v':x[0],onclick:()=>{location.hash=x[0]}},h('span',{'aria-hidden':'true'},x[2]),x[3])));
+ $('#dt').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
+ $('#mc').append(h('option',{value:'all'},'All'),...CAT.map(c=>h('option',{},c)));$('#cur').append(...CUR.map(c=>h('option',{},c)));
+ $('#hd').max=today();$('#hd').min=add(today(),-365);
+ ['#ts','#tf','#tso'].forEach(s=>$(s).addEventListener('input',rTasks));['#mq','#mt','#mc','#mf','#mto'].forEach(s=>$(s).addEventListener('input',rMoney));
+ $('#addT').onclick=()=>edit('task',S.tasks,TF,null,{pri:'Medium',st:'To do'});
+ $('#addH').onclick=()=>edit('habit',S.habits,HF,null,{days:[0,1,2,3,4,5,6],done:[]});
+ $('#addM').onclick=()=>edit('entry',S.money,MF,null,{type:'Expense',date:today(),cat:'Food'});
+ $('#addE').onclick=()=>edit('event',S.events,EF,null,{date:pa},eChk);
+ const hset=d=>{if(okD(d)&&d<=today()&&d>=add(today(),-365)){hd=d;rHabits()}};
+ $('#hp').onclick=()=>hset(add(hd,-1));$('#hn').onclick=()=>hset(add(hd,1));$('#ht').onclick=()=>hset(today());$('#hd').onchange=e=>hset(e.target.value);
+ $('#pv').onchange=e=>{pv=e.target.value;rPlanner()};$('#pp').onclick=()=>pstep(-1);$('#pn').onclick=()=>pstep(1);$('#pt2').onclick=()=>{pa=today();rPlanner()};
+ $('#org').onclick=organize;$('#yapb').onclick=()=>{location.hash='overview';go('overview');$('#yap').focus()};
+ $('#psave').onclick=()=>{for(const k in PK)S.profile[k]=$(PK[k]).value.trim().slice(0,100);save();toast('Profile saved ✓')};
+ $('#cur').onchange=e=>{S.cur=e.target.value;save();toast('Currency updated')};
+ $('#exp').onclick=()=>{const a=h('a',{href:URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'})),download:'iplan-backup-'+today()+'.json'});document.body.append(a);a.click();a.remove();toast('Backup downloaded')};
+ $('#imp').onclick=()=>$('#impf').click();
+ $('#impf').onchange=e=>{const f=e.target.files[0],im=$('#impmsg');e.target.value='';im.textContent='';if(!f)return;
+  if(f.size>5e6){im.textContent='That file is too big to be an iPlan backup.';return}
+  f.text().then(t=>{let r;try{r=JSON.parse(t)}catch(x){}
+   if(!r||typeof r!=='object'||!['tasks','habits','money','events','notes'].some(k=>Array.isArray(r[k]))){im.textContent="That file isn't an iPlan backup. Choose a file made by Export backup.";return}
+   const d=clean(r);   // same safety checks as normal loading
+   ask('Replace everything currently in iPlan with this backup ('+d.tasks.length+' tasks, '+d.habits.length+' habits, '+d.money.length+' money entries, '+d.events.length+' events, '+d.notes.length+' notes)? Your current data will be overwritten.',()=>{S=d;save();dr=null;render();toast('Backup restored ✓')},'Yes, restore backup')})};
+ $('#rst').onclick=()=>ask('Erase ALL iPlan data in this browser? This cannot be undone. Export a backup first if you might need it.',()=>{try{localStorage.removeItem(K)}catch(e){}S=dflt();dr=null;render();toast('All data erased')},'Yes, erase everything');
+ addEventListener('hashchange',()=>go(location.hash.slice(1)));go(location.hash.slice(1)||'overview')}
+init();
+</script>
+</body>
+</html>
